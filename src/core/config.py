@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     PANEL_URL: str
     PANEL_LOGIN: str
     PANEL_PASSWORD: str
+    PUBLIC_HOST: str
     VLESS_INBOUND_ID: int
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")

@@ -2,9 +2,11 @@ import json
 import logging
 import time
 import uuid
-from urllib.parse import quote, urlencode, urljoin, urlparse
+from urllib.parse import quote, urlencode, urljoin
 
 import requests
+
+from src.core.config import settings
 
 
 class XUIApi:
@@ -53,6 +55,7 @@ class XUIApi:
     def _update_xray_config(self):
         if not self.xray_config:
             raise ValueError("Xray config is not loaded.")
+
         url = self._build_url("panel/xray/update")
         payload = {"xraySetting": json.dumps(self.xray_config, indent=2)}
         response = self._make_request("post", url, data=payload)
@@ -90,8 +93,8 @@ class XUIApi:
         return self._update_xray_config()
 
     def get_inbound(self, inbound_id):
-        url = self._build_url("panel/inbound/list")
-        response = self._make_request("post", url)
+        url = self._build_url("panel/api/inbounds/list")
+        response = self._make_request("get", url)
         if not response.get("success"):
             raise RuntimeError(f"Failed to get inbounds list: {response.get('msg')}")
         for inbound in response.get("obj", []):
@@ -102,7 +105,7 @@ class XUIApi:
     def add_client_to_inbound(
         self, inbound_id, client_remark, total_gb=0, expiry_days=0, flow=""
     ):
-        url = self._build_url("panel/inbound/addClient")
+        url = self._build_url("panel/api/inbounds/addClient")
         new_uuid = str(uuid.uuid4())
 
         total_bytes = int(total_gb * 1024**3) if total_gb > 0 else 0
@@ -164,9 +167,9 @@ class XUIApi:
 
         stream_settings = json.loads(inbound_data["streamSettings"])
         reality_settings = stream_settings.get("realitySettings", {})
-        reality_advanced_settings = reality_settings.get("settings", {})
+        reality_advanced_settings = reality_settings.get("settings", reality_settings)
 
-        server_address = urlparse(self.base_url).hostname
+        server_address = settings.PUBLIC_HOST
         port = inbound_data["port"]
         network_type = stream_settings.get("network", "tcp")
         security = stream_settings.get("security")
@@ -183,7 +186,7 @@ class XUIApi:
         params = {
             "type": network_type,
             "security": security,
-            "flow": "",
+            "flow": "xtls-rprx-vision-udp443",
             "pbk": public_key,
             "fp": fingerprint,
             "sni": sni,
@@ -221,6 +224,7 @@ class XUIApi:
             client_remark = client.get("email")
             if client_remark and client_remark.startswith("user-"):
                 outbound_tag = rules_map.get(client_remark)
+
                 if outbound_tag:
                     profile_id = client_remark.replace("user-", "", 1)
                     remark = profile_id.replace("-", " ")
@@ -247,7 +251,7 @@ class XUIApi:
 
         if client_uuid_to_delete:
             del_client_url = self._build_url(
-                "panel/inbound", inbound_id, "delClient", client_uuid_to_delete
+                "panel/api/inbounds", inbound_id, "delClient", client_uuid_to_delete
             )
             self._make_request("post", del_client_url)
         else:
