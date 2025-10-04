@@ -1,8 +1,11 @@
 # 3X-UI Telegram Manager
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
 
 Телеграм-бот для удобного управления профилями на панели X-UI. Позволяет быстро создавать, просматривать и удалять VLESS-профили, в том числе в связке с SOCKS-прокси.
+
+## ⛰️ Codeberg
+Актуальная [ссылка](https://codeberg.org/lonesomestranger/3x-ui-manager) на репозиторий (поддерживается и здесь, и на Codeberg).
 
 ## ✨ Возможности
 
