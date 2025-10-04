@@ -5,7 +5,6 @@ import uuid
 from urllib.parse import quote, urlencode, urljoin
 
 import requests
-
 from src.core.config import settings
 
 
@@ -200,7 +199,7 @@ class XUIApi:
 
         inbound_remark = inbound_data.get("remark") or "VLESS"
         encoded_remark = quote(remark)
-        uri_remark = f"{inbound_remark}-{encoded_remark}"
+        uri_remark = f"{inbound_remark}-user-{encoded_remark}"
 
         uri = (
             f"vless://{client_uuid}@{server_address}:{port}?{query_string}#{uri_remark}"
@@ -263,7 +262,12 @@ class XUIApi:
         config["routing"]["rules"] = [
             rule
             for rule in config["routing"]["rules"]
-            if not (rule.get("user") and rule["user"][0] == client_remark_to_delete)
+            if not (
+                rule.get("user")
+                and isinstance(rule.get("user"), list)
+                and rule["user"]
+                and rule["user"][0] == client_remark_to_delete
+            )
         ]
 
         if outbound_tag_to_delete != "direct":
